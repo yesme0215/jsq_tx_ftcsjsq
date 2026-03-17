@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>方体参数计算器（平行六面体/长方体/正方体）| Parallelepiped & Cuboid & Cube Calculator</title>
+    <style>
+        /* 全局样式统一定义 */
+        :root {
+            --primary-blue: #2196F3;
+            --primary-blue-hover: #1976D2;
+            --primary-green: #4CAF50;
+            --primary-red: #f44336;
+            --primary-red-hover: #d32f2f;
+            --primary-orange: #ff9800;
+            --primary-orange-hover: #f57c00;
+            --gray-light: #f5f5f5;
+            --gray-medium: #e0e0e0;
+            --gray-border: #ddd;
+            --text-main: #333;
+            --text-secondary: #555;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --scale-base: 1.5;
+            --en-font-size: 0.85em; /* 英文副文本字号 */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, "Noto Sans SC Bold", "Source Han Sans CN Bold", 思源黑体粗体, sans-serif;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            padding: 10px;
+            background-color: var(--gray-light);
+            -webkit-overflow-scrolling: touch;
+            overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 英文副文本样式 */
+        .en-text {
+            font-size: var(--en-font-size);
+            color: var(--text-secondary);
+            margin-top: 2px;
+            display: block;
+        }
+        .btn-en {
+            font-size: var(--en-font-size);
+            font-weight: normal;
+            display: block;
+            margin-top: 3px;
+        }
+        .result-en {
+            font-size: var(--en-font-size);
+            color: var(--primary-blue);
+            font-weight: normal;
+        }
+        .formula-en {
+            font-size: var(--en-font-size);
+            color: var(--text-secondary);
+            margin-left: 8px;
+        }
+
+        /* 计算器容器 */
+        .calculator {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* 标题样式 */
+        h1 {
+            text-align: center;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            font-size: clamp(18px, 5vw, 24px);
+            font-weight: 600;
+        }
+        h1 .en-text {
+            font-size: clamp(14px, 3vw, 18px);
+            margin-top: 8px;
+            color: var(--text-secondary);
+        }
+        h3 .en-text {
+            font-size: clamp(12px, 2vw, 14px);
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+
+        /* 形状选择器 */
+        .shape-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .shape-btn {
+            padding: 10px 20px;
+            background: var(--gray-medium);
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: clamp(14px, 3vw, 16px);
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .shape-btn.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .shape-btn:hover {
+            background: #d0d0d0;
+        }
+
+        .shape-btn.active:hover {
+            background: var(--primary-blue-hover);
+        }
+
+        /* 查询面板 */
+        .query-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f0f8f0;
+            border-radius: var(--radius-md);
+            overflow-x: auto; /* 新增：表格横向滚动容器 */
+        }
+
+        .query-panel h3 {
+            margin-bottom: 10px;
+            color: var(--primary-green);
+            text-align: center;
+        }
+
+        .query-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* 按钮通用样式 */
+        .query-btn, .calc-btn {
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .query-btn {
+            padding: 8px 16px;
+            background: var(--primary-blue);
+            color: white;
+            font-size: clamp(14px, 3vw, 16px);
+        }
+
+        .query-btn:hover {
+            background: var(--primary-blue-hover);
+        }
+
+        .export-btn {
+            background: var(--primary-orange) !important;
+        }
+
+        .export-btn:hover {
+            background: var(--primary-orange-hover) !important;
+        }
+
+        .clear-btn {
+            background: var(--primary-red) !important;
+        }
+
+        .clear-btn:hover {
+            background: var(--primary-red-hover) !important;
+        }
+
+        /* 历史表格 - 核心修正 */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            display: none;
+            table-layout: fixed; /* 固定表格布局，列宽自适应容器 */
+            min-width: 800px; /* 最小宽度，确保列不挤压过度 */
+        }
+
+        .history-table th, .history-table td {
+            padding: 8px 6px; /* 微调内边距，减少宽度占用 */
+            border: 1px solid var(--gray-border);
+            text-align: center;
+            font-size: clamp(12px, 3vw, 14px);
+            word-break: break-all; /* 长文本换行 */
+            white-space: nowrap; /* 禁止强制换行，配合滚动 */
+            overflow: hidden; /* 超出隐藏 */
+            text-overflow: ellipsis; /* 超出显示省略号 */
+        }
+        .history-table th {
+            background: var(--primary-green);
+            color: white;
+        }
+        .history-table th .en-text {
+            color: #f0f8f0;
+            font-size: 0.8em;
+            margin-top: 2px;
+        }
+        .history-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        /* 布局容器 */
+        .top-layout, .bottom-layout {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .input-area, .result-area-wrap, .formula-area, .canvas-area {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        /* 输入区域 */
+        .input-area {
+            min-width: 280px;
+        }
+
+        .dimension-group, .angle-group, .derived-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .dimension-item, .angle-item, .derived-item {
+            flex: 1;
+            min-width: 120px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .edge2-item, .edge3-item, .angle1-item, .angle2-item, .angle3-item {
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        .edge2-item.disabled, .edge3-item.disabled, .angle1-item.disabled, .angle2-item.disabled, .angle3-item.disabled {
+            opacity: 0.6;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: clamp(14px, 3vw, 16px);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 10px;
+            border: 1px solid var(--gray-border);
+            border-radius: var(--radius-md);
+            font-size: clamp(14px, 3vw, 16px);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
+        }
+
+        /* 计算按钮 */
+        .calc-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-green);
+            color: white;
+            font-size: clamp(16px, 4vw, 18px);
+            margin-bottom: 15px;
+            transition: background-color 0.3s, transform 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .calc-btn:hover {
+            background-color: #45a049;
+        }
+
+        .calc-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 结果区域 */
+        .result-area-wrap {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .result-area {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: var(--radius-md);
+            width: 100%;
+            height: 100%;
+        }
+
+        .result-item {
+            margin-bottom: 8px;
+            font-size: clamp(14px, 3vw, 16px);
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: var(--primary-blue);
+            min-width: 120px;
+        }
+
+        .result-value {
+            flex: 1;
+            text-align: right;
+            margin-left: 8px;
+            word-break: break-all;
+        }
+
+        .missing-tip {
+            color: var(--primary-red);
+            font-size: 12px;
+            font-weight: normal;
+            margin-left: 8px;
+            flex: 100%;
+            margin-top: 2px;
+        }
+
+        /* 提示文本 */
+        .shape-tip {
+            color: var(--primary-green);
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 10px;
+            display: block;
+            font-size: clamp(14px, 3vw, 16px);
+        }
+
+        .tip-text {
+            color: #ff5722;
+            font-weight: 600;
+            text-align: center;
+            margin: 8px 0;
+            font-size: clamp(14px, 3vw, 16px);
+        }
+
+        /* 公式区域 */
+        .formula-area {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: var(--radius-md);
+            border: 1px solid #eee;
+        }
+
+        .formula-area h3 {
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            font-size: clamp(16px, 3vw, 18px);
+            text-align: center;
+        }
+
+        .formula-item {
+            margin-bottom: 8px;
+            font-size: clamp(14px, 3vw, 16px);
+            line-height: 1.8;
+        }
+
+        .formula-item strong {
+            color: var(--primary-red-hover);
+        }
+
+        /* 几何体图形展示区域（替换原SVG为图片） */
+        .canvas-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 10px 10px 60px;
+            min-height: 400px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* 几何体展示图片样式 */
+        .shape-img {
+            max-width: 100%;
+            height: auto;
+            min-width: 450px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* 页脚样式 */
+        .footer {
+            max-width: 1200px;
+            margin: 20px auto 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .copyright {
+            flex: 1;
+            min-width: 300px;
+            color: var(--text-secondary);
+            font-size: clamp(12px, 2vw, 14px);
+            line-height: 1.8;
+        }
+
+        .logo-container {
+            flex: 0 0 200px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Logo图片样式 */
+        .logo-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 767px) {
+            body {
+                padding: 5px;
+                background-color: #fff;
+            }
+
+            .calculator {
+                box-shadow: none;
+                padding: 15px 10px;
+                border-radius: 0;
+                max-width: 100%;
+            }
+
+            .top-layout, .bottom-layout {
+                gap: 15px;
+            }
+
+            .dimension-group, .angle-group, .derived-group {
+                gap: 8px;
+            }
+
+            .result-area {
+                padding: 12px;
+            }
+
+            .query-btn-group {
+                flex-direction: column;
+            }
+
+            .query-btn {
+                width: 100%;
+            }
+
+            .shape-selector {
+                flex-direction: column;
+            }
+
+            .shape-btn {
+                width: 100%;
+            }
+
+            .shape-img {
+                min-width: 360px;
+            }
+
+            .canvas-area {
+                min-height: 320px;
+                padding: 30px 5px 5px 30px;
+            }
+
+            /* 移动端页脚适配 */
+            .footer {
+                padding: 15px;
+                border-radius: 0;
+                box-shadow: none;
+                gap: 15px;
+            }
+
+            .logo-container {
+                flex: 1;
+                min-width: 200px;
+                height: 100px;
+            }
+            .en-text {
+                --en-font-size: 0.8em;
+            }
+
+            /* 移动端表格适配 */
+            .history-table {
+                min-width: 600px;
+            }
+            .history-table th, .history-table td {
+                font-size: 12px;
+                padding: 6px 4px;
+            }
+        }
+
+        @media (orientation: landscape) and (max-width: 767px) {
+            .top-layout, .bottom-layout {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .input-area, .result-area-wrap {
+                min-width: 250px;
+            }
+
+            .formula-area, .canvas-area {
+                min-width: 200px;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .calculator {
+                max-width: 95%;
+                padding: 18px;
+            }
+
+            .top-layout, .bottom-layout {
+                gap: 15px;
+            }
+
+            .footer {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>方体参数计算器（平行六面体/长方体/正方体）
+            <span class="en-text">Parallelepiped & Cuboid & Cube Parameter Calculator</span>
+        </h1>
+        <div class="shape-selector">
+            <button class="shape-btn active" data-shape="parallelepiped">平行六面体
+                <span class="btn-en">Parallelepiped</span>
+            </button>
+            <button class="shape-btn" data-shape="cuboid">长方体
+                <span class="btn-en">Cuboid</span>
+            </button>
+            <button class="shape-btn" data-shape="cube">正方体
+                <span class="btn-en">Cube</span>
+            </button>
+        </div>
+        <div class="query-panel">
+            <h3>历史计算记录
+                <span class="en-text">Calculation History</span>
+            </h3>
+            <div class="query-btn-group">
+                <button class="query-btn" id="showHistoryBtn">查看历史记录
+                    <span class="btn-en">View History</span>
+                </button>
+                <button class="query-btn export-btn" id="exportCsvBtn">导出CSV文件
+                    <span class="btn-en">Export CSV</span>
+                </button>
+                <button class="query-btn clear-btn" id="clearHistoryBtn">清空历史记录
+                    <span class="btn-en">Clear History</span>
+                </button>
+            </div>
+            <table class="history-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>序号<span class="en-text">No.</span></th>
+                        <th>计算时间<span class="en-text">Time</span></th>
+                        <th>棱长a(cm)<span class="en-text">Edge a (cm)</span></th>
+                        <th>棱长b(cm)<span class="en-text">Edge b (cm)</span></th>
+                        <th>棱长c(cm)<span class="en-text">Edge c (cm)</span></th>
+                        <th>ab夹角α(°)<span class="en-text">∠ab α (°)</span></th>
+                        <th>ac夹角β(°)<span class="en-text">∠ac β (°)</span></th>
+                        <th>bc夹角γ(°)<span class="en-text">∠bc γ (°)</span></th>
+                        <th>底面积(cm²)<span class="en-text">Base Area (cm²)</span></th>
+                        <th>表面积(cm²)<span class="en-text">Surface Area (cm²)</span></th>
+                        <th>体积(cm³)<span class="en-text">Volume (cm³)</span></th>
+                        <th>密度(g/cm³)<span class="en-text">Density (g/cm³)</span></th>
+                        <th>重量(g)<span class="en-text">Weight (g)</span></th>
+                        <th>形状<span class="en-text">Shape</span></th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody"></tbody>
+            </table>
+        </div>
+        <div class="top-layout">
+            <div class="input-area" id="inputResultArea">
+                <div class="dimension-group">
+                    <div class="dimension-item">
+                        <label for="edge1">棱长 a (cm)：
+                            <span class="en-text">Edge a (cm): Edge from vertex A</span>
+                        </label>
+                        <input type="number" id="edge1" min="0.01" step="0.01" placeholder="顶点A出发的棱a | Edge from vertex A">
+                    </div>
+                    <div class="dimension-item edge2-item">
+                        <label for="edge2">棱长 b (cm)：
+                            <span class="en-text">Edge b (cm): Edge from vertex A</span>
+                        </label>
+                        <input type="number" id="edge2" min="0.01" step="0.01" placeholder="顶点A出发的棱b（正方体=a） | Edge b (Cube = a)">
+                    </div>
+                    <div class="dimension-item edge3-item">
+                        <label for="edge3">棱长 c (cm)：
+                            <span class="en-text">Edge c (cm): Edge from vertex A</span>
+                        </label>
+                        <input type="number" id="edge3" min="0.01" step="0.01" placeholder="顶点A出发的棱c（正方体=a） | Edge c (Cube = a)">
+                    </div>
+                </div>
+                <div class="angle-group">
+                    <div class="angle-item angle1-item">
+                        <label for="angle1">ab夹角 α (°)：
+                            <span class="en-text">∠ab α (°): Angle between edge a & b</span>
+                        </label>
+                        <input type="number" id="angle1" min="0.01" max="179.99" step="0.01" placeholder="棱a与棱b的夹角，长方体=90 | Cuboid = 90°">
+                    </div>
+                    <div class="angle-item angle2-item">
+                        <label for="angle2">ac夹角 β (°)：
+                            <span class="en-text">∠ac β (°): Angle between edge a & c</span>
+                        </label>
+                        <input type="number" id="angle2" min="0.01" max="179.99" step="0.01" placeholder="棱a与棱c的夹角，长方体=90 | Cuboid = 90°">
+                    </div>
+                    <div class="angle-item angle3-item">
+                        <label for="angle3">bc夹角 γ (°)：
+                            <span class="en-text">∠bc γ (°): Angle between edge b & c</span>
+                        </label>
+                        <input type="number" id="angle3" min="0.01" max="179.99" step="0.01" placeholder="棱b与棱c的夹角，长方体=90 | Cuboid = 90°">
+                    </div>
+                </div>
+                <div class="derived-group">
+                    <div class="derived-item">
+                        <label for="surfaceArea">表面积 (cm²)：
+                            <span class="en-text">Surface Area (cm²): Input manually</span>
+                        </label>
+                        <input type="number" id="surfaceArea" min="0.01" step="0.01" placeholder="输入表面积 | Input Surface Area">
+                    </div>
+                    <div class="derived-item">
+                        <label for="volumeInput">体积 (cm³)：
+                            <span class="en-text">Volume (cm³): Input manually</span>
+                        </label>
+                        <input type="number" id="volumeInput" min="0.01" step="0.01" placeholder="输入体积 | Input Volume">
+                    </div>
+                </div>
+                <div class="dimension-group">
+                    <div class="dimension-item">
+                        <label for="density">密度 (g/cm³)：
+                            <span class="en-text">Density (g/cm³): Material density</span>
+                        </label>
+                        <input type="number" id="density" min="0.001" step="0.001" placeholder="输入物质密度 | Input Material Density">
+                    </div>
+                    <div class="dimension-item">
+                        <label for="weight">重量 (g)：
+                            <span class="en-text">Weight (g): Object weight</span>
+                        </label>
+                        <input type="number" id="weight" min="0.01" step="0.01" placeholder="输入物体重量 | Input Object Weight">
+                    </div>
+                </div>
+                <button class="calc-btn" id="calc-btn">开始计算
+                    <span class="btn-en">Start Calculation</span>
+                </button>
+                <div class="tip-text" id="tip-text">请选择图形类型并输入参数后点击计算 | Select shape and input parameters, then click calculate</div>
+            </div>
+            <div class="result-area-wrap">
+                <div class="result-area">
+                    <div class="shape-tip" id="shape-tip">当前计算：平行六面体 | Current Calculation: Parallelepiped</div>
+                    <div class="result-item">
+                        <span class="result-label">棱长 a：<span class="result-en">Edge a</span></span>
+                        <span class="result-value" id="result-edge1">--</span>
+                        <span class="missing-tip" id="tip-edge1"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">棱长 b：<span class="result-en">Edge b</span></span>
+                        <span class="result-value" id="result-edge2">--</span>
+                        <span class="missing-tip" id="tip-edge2"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">棱长 c：<span class="result-en">Edge c</span></span>
+                        <span class="result-value" id="result-edge3">--</span>
+                        <span class="missing-tip" id="tip-edge3"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">ab夹角 α：<span class="result-en">∠ab α</span></span>
+                        <span class="result-value" id="result-angle1">--</span>
+                        <span class="missing-tip" id="tip-angle1"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">ac夹角 β：<span class="result-en">∠ac β</span></span>
+                        <span class="result-value" id="result-angle2">--</span>
+                        <span class="missing-tip" id="tip-angle2"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">bc夹角 γ：<span class="result-en">∠bc γ</span></span>
+                        <span class="result-value" id="result-angle3">--</span>
+                        <span class="missing-tip" id="tip-angle3"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">底面积：<span class="result-en">Base Area</span></span>
+                        <span class="result-value" id="result-baseArea">--</span>
+                        <span class="missing-tip" id="tip-baseArea"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">表面积 (S)：<span class="result-en">Surface Area (S)</span></span>
+                        <span class="result-value" id="result-surface">--</span>
+                        <span class="missing-tip" id="tip-surface"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">体积 (V)：<span class="result-en">Volume (V)</span></span>
+                        <span class="result-value" id="result-volume">--</span>
+                        <span class="missing-tip" id="tip-volume"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">密度 (ρ)：<span class="result-en">Density (ρ)</span></span>
+                        <span class="result-value" id="result-density">--</span>
+                        <span class="missing-tip" id="tip-density"></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">重量 (G)：<span class="result-en">Weight (G)</span></span>
+                        <span class="result-value" id="result-weight">--</span>
+                        <span class="missing-tip" id="tip-weight"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom-layout">
+            <div class="formula-area">
+                <h3>计算公式说明
+                    <span class="en-text">Formula Explanation</span>
+                </h3>
+                <div class="formula-item"><strong>核心定义 | Core Definition</strong>：</div>
+                <div class="formula-item">• α：同一顶点A出发的棱a与棱b的夹角 <span class="formula-en">α: Angle between edge a & b from vertex A</span></div>
+                <div class="formula-item">• β：同一顶点A出发的棱a与棱c的夹角 <span class="formula-en">β: Angle between edge a & c from vertex A</span></div>
+                <div class="formula-item">• γ：同一顶点A出发的棱b与棱c的夹角 <span class="formula-en">γ: Angle between edge b & c from vertex A</span></div>
+                <div class="formula-item">• 长方体/正方体：α=β=γ=90° <span class="formula-en">Cuboid/Cube: α=β=γ=90°</span></div>
+                <div class="formula-item"><strong>1. 通用平行六面体 | General Parallelepiped</strong>：</div>
+                <div class="formula-item">• 底面积（以ab为底面）S<sub>底</sub> = <strong>a×b×sinα</strong> <span class="formula-en">Base Area (ab as base)</span></div>
+                <div class="formula-item">• 体积 V = <strong>a×b×c×√[1 - cos²α - cos²β - cos²γ + 2cosαcosβcosγ]</strong> <span class="formula-en">Volume (Scalar triple product)</span></div>
+                <div class="formula-item">• 表面积 S = <strong>2(ab·sinα + bc·sinγ + ac·sinβ)</strong> <span class="formula-en">Surface Area (Sum of 6 faces)</span></div>
+                <div class="formula-item"><strong>2. 长方体（特殊直平行六面体）| Cuboid (Special Right Parallelepiped)</strong>：</div>
+                <div class="formula-item">• α=β=γ=90°，sin90°=1，cos90°=0 <span class="formula-en">sin90°=1, cos90°=0</span></div>
+                <div class="formula-item">• 底面积 S<sub>底</sub>=a×b，体积 V = <strong>a×b×c</strong> <span class="formula-en">Base Area & Volume</span></div>
+                <div class="formula-item">• 表面积 S = <strong>2(ab + bc + ac)</strong> <span class="formula-en">Surface Area</span></div>
+                <div class="formula-item"><strong>3. 正方体（特殊长方体，a=b=c）| Cube (Special Cuboid, a=b=c)</strong>：</div>
+                <div class="formula-item">• 表面积 S = <strong>6a²</strong>，体积 V = <strong>a³</strong> <span class="formula-en">Surface Area & Volume</span></div>
+                <div class="formula-item"><strong>4. 密度/重量关系 | Density & Weight Relationship</strong>：</div>
+                <div class="formula-item">• 重量 G = <strong>体积 V × 密度 ρ</strong> <span class="formula-en">Weight = Volume × Density</span></div>
+                <div class="formula-item">• 密度 ρ = <strong>重量 G ÷ 体积 V</strong> <span class="formula-en">Density = Weight ÷ Volume</span></div>
+            </div>
+            <!-- 几何体图形展示区域：src留空，由JS初始化 -->
+            <div class="canvas-area">
+                <img id="shapeImg" class="shape-img" src="" alt="平行六面体示意图">
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚区域 -->
+    <div class="footer">
+        <div class="copyright">
+            ©2026 四有坊 版权所有。<br>
+            ©2026 syou.fun All rights reserved.<br>
+            免责声明：本站所载信息仅供参考，不构成任何投资或操作建议。用户据此操作，风险自担。<br>
+            <span class="en-text">Disclaimer: The information on this site is for reference only and does not constitute any investment or operation advice. Users operate at their own risk.</span>
+        </div>
+        <div class="logo-container">
+            <!-- Logo图片：src留空，由JS初始化 -->
+            <img class="logo-img" src="" alt="四有坊 Logo">
+        </div>
+    </div>
+
+    <script>
+        // ========== 只需修改这个全局常量，所有图片路径自动生效 ==========
+        const IMAGE_CONFIG = {
+            // 几何体示意图路径（修改这里！）
+            parallelepiped: 'images/parallelepiped.png', // 平行六面体图片
+            cuboid: 'images/cuboid.png', // 长方体图片
+            cube: 'images/cube.png', // 正方体图片
+            // Logo路径（修改这里！）
+            logo: 'images/logo.png'
+        };
+        // ==============================================================
+
+        let currentShape = 'parallelepiped';
+        let historyVisible = false;
+        let calculationHistory = JSON.parse(localStorage.getItem('cubeCalculatorHistory')) || [];
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            initShapeSelector();
+            initHistoryButtons();
+            initCalcButton();
+            renderHistoryTable();
+            // 初始化Logo图片路径
+            document.querySelector('.logo-img').src = IMAGE_CONFIG.logo;
+        });
+
+        // 初始化形状选择器
+        function initShapeSelector() {
+            const shapeButtons = document.querySelectorAll('.shape-btn');
+            const shapeImg = document.getElementById('shapeImg');
+            
+            // 引用全局图片路径常量
+            const shapeImageMap = {
+                'parallelepiped': IMAGE_CONFIG.parallelepiped,
+                'cuboid': IMAGE_CONFIG.cuboid,
+                'cube': IMAGE_CONFIG.cube
+            };
+            
+            // 初始化初始图片路径（平行六面体）
+            shapeImg.src = IMAGE_CONFIG.parallelepiped;
+            
+            shapeButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 切换激活状态
+                    shapeButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 更新当前形状
+                    currentShape = this.dataset.shape;
+                    
+                    // 更新几何体展示图片
+                    shapeImg.src = shapeImageMap[currentShape];
+                    shapeImg.alt = `${this.textContent.split('\n')[0].trim()}示意图`;
+                    
+                    // 多语言形状名称
+                    const shapeNameMap = {
+                        'parallelepiped': '平行六面体 | Parallelepiped',
+                        'cuboid': '长方体 | Cuboid',
+                        'cube': '正方体 | Cube'
+                    };
+                    document.getElementById('shape-tip').textContent = `当前计算：${shapeNameMap[currentShape]}`;
+                    
+                    // 更新输入框状态
+                    updateInputStates();
+                    
+                    // 清空提示
+                    document.getElementById('tip-text').textContent = '请选择图形类型并输入参数后点击计算 | Select shape and input parameters, then click calculate';
+                });
+            });
+        }
+
+        // 获取形状名称（多语言）
+        function getShapeName(shape) {
+            const names = {
+                'parallelepiped': '平行六面体 | Parallelepiped',
+                'cuboid': '长方体 | Cuboid',
+                'cube': '正方体 | Cube'
+            };
+            return names[shape] || shape;
+        }
+
+        // 更新输入框状态（根据不同形状禁用/启用对应输入框）
+        function updateInputStates() {
+            const edge2 = document.querySelector('.edge2-item');
+            const edge3 = document.querySelector('.edge3-item');
+            const angle1 = document.querySelector('.angle1-item');
+            const angle2 = document.querySelector('.angle2-item');
+            const angle3 = document.querySelector('.angle3-item');
+            
+            // 重置所有输入框状态
+            [edge2, edge3, angle1, angle2, angle3].forEach(el => {
+                el.classList.remove('disabled');
+                el.querySelector('input').disabled = false;
+            });
+            
+            // 根据形状设置输入框状态
+            if (currentShape === 'cube') {
+                // 正方体：b和c等于a，角度都是90度
+                edge2.classList.add('disabled');
+                edge3.classList.add('disabled');
+                angle1.classList.add('disabled');
+                angle2.classList.add('disabled');
+                angle3.classList.add('disabled');
+                
+                document.getElementById('edge2').disabled = true;
+                document.getElementById('edge3').disabled = true;
+                document.getElementById('angle1').disabled = true;
+                document.getElementById('angle2').disabled = true;
+                document.getElementById('angle3').disabled = true;
+                
+                // 设置默认值
+                document.getElementById('angle1').value = 90;
+                document.getElementById('angle2').value = 90;
+                document.getElementById('angle3').value = 90;
+            } else if (currentShape === 'cuboid') {
+                // 长方体：角度都是90度
+                angle1.classList.add('disabled');
+                angle2.classList.add('disabled');
+                angle3.classList.add('disabled');
+                
+                document.getElementById('angle1').disabled = true;
+                document.getElementById('angle2').disabled = true;
+                document.getElementById('angle3').disabled = true;
+                
+                // 设置默认值
+                document.getElementById('angle1').value = 90;
+                document.getElementById('angle2').value = 90;
+                document.getElementById('angle3').value = 90;
+            }
+        }
+
+        // 初始化历史记录按钮
+        function initHistoryButtons() {
+            // 查看/隐藏历史记录 - 修正按钮文字切换
+            document.getElementById('showHistoryBtn').addEventListener('click', function() {
+                const historyTable = document.getElementById('historyTable');
+                historyVisible = !historyVisible;
+                
+                // 切换按钮文字（包含中英文）
+                if (historyVisible) {
+                    this.innerHTML = '隐藏历史记录<span class="btn-en">Hide History</span>';
+                    historyTable.style.display = 'table';
+                } else {
+                    this.innerHTML = '查看历史记录<span class="btn-en">View History</span>';
+                    historyTable.style.display = 'none';
+                }
+            });
+
+            // 清空历史记录
+            document.getElementById('clearHistoryBtn').addEventListener('click', function() {
+                if (confirm('确定要清空所有历史记录吗？| Are you sure to clear all history?')) {
+                    calculationHistory = [];
+                    localStorage.removeItem('cubeCalculatorHistory');
+                    renderHistoryTable();
+                    alert('历史记录已清空 | History cleared');
+                }
+            });
+
+            // 导出CSV
+            document.getElementById('exportCsvBtn').addEventListener('click', function() {
+                if (calculationHistory.length === 0) {
+                    alert('暂无历史记录可导出 | No history to export');
+                    return;
+                }
+                
+                // 构建CSV内容
+                const headers = ['序号', '计算时间', '棱长a(cm)', '棱长b(cm)', '棱长c(cm)', 
+                                'ab夹角α(°)', 'ac夹角β(°)', 'bc夹角γ(°)', '底面积(cm²)', 
+                                '表面积(cm²)', '体积(cm³)', '密度(g/cm³)', '重量(g)', '形状'];
+                let csvContent = headers.join(',') + '\n';
+                
+                calculationHistory.forEach((item, index) => {
+                    const row = [
+                        index + 1,
+                        item.time,
+                        item.edge1,
+                        item.edge2,
+                        item.edge3,
+                        item.angle1,
+                        item.angle2,
+                        item.angle3,
+                        item.baseArea,
+                        item.surfaceArea,
+                        item.volume,
+                        item.density,
+                        item.weight,
+                        item.shape
+                    ];
+                    csvContent += row.join(',') + '\n';
+                });
+                
+                // 创建下载链接
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `方体计算记录_${new Date().toLocaleDateString()}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+
+        // 初始化计算按钮（核心修正：补充完整计算逻辑）
+        function initCalcButton() {
+            document.getElementById('calc-btn').addEventListener('click', function() {
+                // 清空所有提示
+                document.querySelectorAll('.missing-tip').forEach(tip => tip.textContent = '');
+                
+                // 1. 获取并验证输入参数
+                const params = getAndValidateParams();
+                if (!params) return;
+                
+                // 2. 执行计算
+                const results = calculate(params);
+                
+                // 3. 更新结果显示
+                updateResultDisplay(results);
+                
+                // 4. 保存到历史记录
+                saveToHistory(params, results);
+                
+                // 5. 更新提示
+                document.getElementById('tip-text').textContent = '计算完成 | Calculation completed';
+            });
+        }
+
+        // 获取并验证输入参数
+        function getAndValidateParams() {
+            const edge1 = parseFloat(document.getElementById('edge1').value);
+            let edge2 = edge1, edge3 = edge1;
+            let angle1 = 90, angle2 = 90, angle3 = 90;
+            const density = parseFloat(document.getElementById('density').value) || 0;
+            const weight = parseFloat(document.getElementById('weight').value) || 0;
+            
+            // 基础验证：棱长a必须填写
+            if (isNaN(edge1) || edge1 <= 0) {
+                document.getElementById('tip-edge1').textContent = '请输入有效的棱长a（大于0）| Please input valid edge a (>0)';
+                document.getElementById('tip-text').textContent = '参数错误：棱长a无效 | Parameter error: invalid edge a';
+                return null;
+            }
+            
+            // 根据形状获取参数
+            if (currentShape !== 'cube') {
+                edge2 = parseFloat(document.getElementById('edge2').value) || 0;
+                edge3 = parseFloat(document.getElementById('edge3').value) || 0;
+                
+                // 长方体/平行六面体验证b、c
+                if (edge2 <= 0 || edge3 <= 0) {
+                    if (edge2 <= 0) document.getElementById('tip-edge2').textContent = '请输入有效的棱长b（大于0）| Please input valid edge b (>0)';
+                    if (edge3 <= 0) document.getElementById('tip-edge3').textContent = '请输入有效的棱长c（大于0）| Please input valid edge c (>0)';
+                    document.getElementById('tip-text').textContent = '参数错误：棱长b/c无效 | Parameter error: invalid edge b/c';
+                    return null;
+                }
+                
+                // 平行六面体验证角度
+                if (currentShape === 'parallelepiped') {
+                    angle1 = parseFloat(document.getElementById('angle1').value) || 0;
+                    angle2 = parseFloat(document.getElementById('angle2').value) || 0;
+                    angle3 = parseFloat(document.getElementById('angle3').value) || 0;
+                    
+                    if (angle1 <= 0 || angle1 >= 180 || angle2 <= 0 || angle2 >= 180 || angle3 <= 0 || angle3 >= 180) {
+                        if (angle1 <= 0 || angle1 >= 180) document.getElementById('tip-angle1').textContent = '角度需在0-180°之间 | Angle must be 0-180°';
+                        if (angle2 <= 0 || angle2 >= 180) document.getElementById('tip-angle2').textContent = '角度需在0-180°之间 | Angle must be 0-180°';
+                        if (angle3 <= 0 || angle3 >= 180) document.getElementById('tip-angle3').textContent = '角度需在0-180°之间 | Angle must be 0-180°';
+                        document.getElementById('tip-text').textContent = '参数错误：角度无效 | Parameter error: invalid angle';
+                        return null;
+                    }
+                }
+            }
+            
+            return {
+                edge1, edge2, edge3,
+                angle1, angle2, angle3,
+                density, weight
+            };
+        }
+
+        // 核心计算逻辑
+        function calculate(params) {
+            const { edge1, edge2, edge3, angle1, angle2, angle3, density, weight } = params;
+            let baseArea = 0, surfaceArea = 0, volume = 0;
+            
+            // 角度转弧度（用于三角函数计算）
+            const rad1 = angle1 * Math.PI / 180;
+            const rad2 = angle2 * Math.PI / 180;
+            const rad3 = angle3 * Math.PI / 180;
+            
+            // 1. 正方体计算
+            if (currentShape === 'cube') {
+                baseArea = edge1 * edge1; // 底面积
+                surfaceArea = 6 * edge1 * edge1; // 表面积
+                volume = edge1 * edge1 * edge1; // 体积
+            }
+            // 2. 长方体计算
+            else if (currentShape === 'cuboid') {
+                baseArea = edge1 * edge2; // 底面积（ab面）
+                surfaceArea = 2 * (edge1*edge2 + edge2*edge3 + edge1*edge3); // 表面积
+                volume = edge1 * edge2 * edge3; // 体积
+            }
+            // 3. 平行六面体计算
+            else if (currentShape === 'parallelepiped') {
+                baseArea = edge1 * edge2 * Math.sin(rad1); // 底面积（ab面，含夹角）
+                // 表面积：2*(ab·sinα + bc·sinγ + ac·sinβ)
+                surfaceArea = 2 * (
+                    edge1*edge2*Math.sin(rad1) + 
+                    edge2*edge3*Math.sin(rad3) + 
+                    edge1*edge3*Math.sin(rad2)
+                );
+                // 体积：a×b×c×√[1 - cos²α - cos²β - cos²γ + 2cosαcosβcosγ]
+                const cos1 = Math.cos(rad1);
+                const cos2 = Math.cos(rad2);
+                const cos3 = Math.cos(rad3);
+                const volumeFactor = Math.sqrt(1 - cos1*cos1 - cos2*cos2 - cos3*cos3 + 2*cos1*cos2*cos3);
+                volume = edge1 * edge2 * edge3 * volumeFactor;
+            }
+            
+            // 密度/重量互算
+            let calcDensity = density, calcWeight = weight;
+            if (volume > 0) {
+                if (density > 0 && weight === 0) {
+                    calcWeight = volume * density; // 已知密度算重量
+                } else if (weight > 0 && density === 0) {
+                    calcDensity = weight / volume; // 已知重量算密度
+                }
+            }
+            
+            // 保留4位小数
+            return {
+                edge1: edge1.toFixed(4),
+                edge2: edge2.toFixed(4),
+                edge3: edge3.toFixed(4),
+                angle1: angle1.toFixed(2),
+                angle2: angle2.toFixed(2),
+                angle3: angle3.toFixed(2),
+                baseArea: baseArea.toFixed(4),
+                surfaceArea: surfaceArea.toFixed(4),
+                volume: volume.toFixed(4),
+                density: calcDensity > 0 ? calcDensity.toFixed(4) : '--',
+                weight: calcWeight > 0 ? calcWeight.toFixed(4) : '--'
+            };
+        }
+
+        // 更新结果显示
+        function updateResultDisplay(results) {
+            document.getElementById('result-edge1').textContent = results.edge1;
+            document.getElementById('result-edge2').textContent = results.edge2;
+            document.getElementById('result-edge3').textContent = results.edge3;
+            document.getElementById('result-angle1').textContent = results.angle1;
+            document.getElementById('result-angle2').textContent = results.angle2;
+            document.getElementById('result-angle3').textContent = results.angle3;
+            document.getElementById('result-baseArea').textContent = results.baseArea;
+            document.getElementById('result-surface').textContent = results.surfaceArea;
+            document.getElementById('result-volume').textContent = results.volume;
+            document.getElementById('result-density').textContent = results.density;
+            document.getElementById('result-weight').textContent = results.weight;
+        }
+
+        // 保存到历史记录
+        function saveToHistory(params, results) {
+            const record = {
+                time: new Date().toLocaleString(),
+                edge1: results.edge1,
+                edge2: results.edge2,
+                edge3: results.edge3,
+                angle1: results.angle1,
+                angle2: results.angle2,
+                angle3: results.angle3,
+                baseArea: results.baseArea,
+                surfaceArea: results.surfaceArea,
+                volume: results.volume,
+                density: results.density,
+                weight: results.weight,
+                shape: getShapeName(currentShape)
+            };
+            
+            calculationHistory.push(record);
+            // 最多保存100条记录
+            if (calculationHistory.length > 100) {
+                calculationHistory.shift();
+            }
+            localStorage.setItem('cubeCalculatorHistory', JSON.stringify(calculationHistory));
+            renderHistoryTable();
+        }
+
+        // 渲染历史记录表格
+        function renderHistoryTable() {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+            
+            if (calculationHistory.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="14">暂无历史记录 | No calculation history</td>`;
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            calculationHistory.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.time}</td>
+                    <td>${item.edge1}</td>
+                    <td>${item.edge2}</td>
+                    <td>${item.edge3}</td>
+                    <td>${item.angle1}</td>
+                    <td>${item.angle2}</td>
+                    <td>${item.angle3}</td>
+                    <td>${item.baseArea}</td>
+                    <td>${item.surfaceArea}</td>
+                    <td>${item.volume}</td>
+                    <td>${item.density}</td>
+                    <td>${item.weight}</td>
+                    <td>${item.shape}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
