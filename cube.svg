@@ -1,0 +1,30 @@
+<svg width="950" height="900" viewBox="0 0 950 900" xmlns="http://www.w3.org/2000/svg">
+  <!-- 样式定义 -->
+  <style>
+    .solid { stroke: #000000; stroke-width: 3; fill: none; }
+    .dashed { stroke: #000000; stroke-width: 3; fill: none; stroke-dasharray: 6 3; }
+    .text-red { fill: #ff0000; font-size: 48px; font-weight: bold; font-family: Arial, sans-serif; }
+  </style>
+
+  <!-- 正方体可见实线棱（强化Z向深度） -->
+  <!-- 正面正方形轮廓 -->
+  <line class="solid" x1="100" y1="800" x2="700" y2="800" />
+  <line class="solid" x1="700" y1="800" x2="700" y2="300" />
+  <line class="solid" x1="700" y1="300" x2="100" y2="300" />
+  <line class="solid" x1="100" y1="300" x2="100" y2="800" />
+  <!-- 右侧面（加深Z向） -->
+  <line class="solid" x1="700" y1="800" x2="880" y2="620" />
+  <line class="solid" x1="880" y1="620" x2="880" y2="120" />
+  <line class="solid" x1="880" y1="120" x2="700" y2="300" />
+  <!-- 顶面（加深Z向） -->
+  <line class="solid" x1="100" y1="300" x2="280" y2="120" />
+  <line class="solid" x1="280" y1="120" x2="880" y2="120" />
+
+  <!-- 正方体不可见虚线棱 -->
+  <line class="dashed" x1="280" y1="120" x2="280" y2="620" />
+  <line class="dashed" x1="280" y1="620" x2="880" y2="620" />
+  <line class="dashed" x1="100" y1="800" x2="280" y2="620" />
+
+  <!-- 边长标签a -->
+  <text class="text-red" x="400" y="780" text-anchor="middle">a</text>
+</svg>

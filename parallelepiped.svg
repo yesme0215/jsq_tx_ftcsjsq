@@ -1,0 +1,39 @@
+<svg width="850" height="600" viewBox="0 0 850 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- 样式定义 -->
+  <style>
+    .solid { stroke: #000; stroke-width: 3; fill: none; }
+    .dashed { stroke: #000; stroke-width: 3; fill: none; stroke-dasharray: 5 3; }
+    .angle { stroke: #009900; stroke-width: 2; fill: none; stroke-dasharray: 4 2; }
+    .text-red { fill: #ff0000; font-size: 36px; font-weight: bold; font-family: Arial, sans-serif; }
+    .text-green { fill: #009900; font-size: 28px; font-weight: bold; font-family: Arial, sans-serif; }
+  </style>
+
+  <!-- 平行六面体实线（可见棱） -->
+  <line class="solid" x1="100" y1="500" x2="150" y2="300" />
+  <line class="solid" x1="100" y1="500" x2="600" y2="500" />
+  <line class="solid" x1="150" y1="300" x2="650" y2="300" />
+  <line class="solid" x1="650" y1="300" x2="600" y2="500" />
+  <line class="solid" x1="650" y1="300" x2="750" y2="200" />
+  <line class="solid" x1="750" y1="200" x2="700" y2="400" />
+  <line class="solid" x1="700" y1="400" x2="600" y2="500" />
+
+  <!-- 平行六面体虚线（不可见棱） -->
+  <line class="dashed" x1="100" y1="500" x2="200" y2="400" />
+  <line class="dashed" x1="200" y1="400" x2="250" y2="200" />
+  <line class="dashed" x1="200" y1="400" x2="700" y2="400" />
+  <line class="solid" x1="250" y1="200" x2="750" y2="200" />
+  <line class="solid" x1="250" y1="200" x2="150" y2="300" />
+
+  <!-- 角度标记圆弧 -->
+  <path class="angle" d="M 160 500 A 60 60 0 0 0 142.43 457.57" />
+  <path class="angle" d="M 170.71 429.29 A 100 100 0 0 0 124.25 403" />
+  <path class="angle" d="M 240 500 A 140 140 0 0 0 133.95 364.19" />
+
+  <!-- 字母标签 -->
+  <text class="text-red" x="70" y="400">a</text>
+  <text class="text-red" x="350" y="535">b</text>
+  <text class="text-red" x="180" y="450">c</text>
+  <text class="text-green" x="200" y="460">α</text>
+  <text class="text-green" x="120" y="440">β</text>
+  <text class="text-green" x="160" y="480">γ</text>
+</svg>

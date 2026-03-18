@@ -1,0 +1,29 @@
+<svg width="1200" height="620" viewBox="-100 0 1150 620" xmlns="http://www.w3.org/2000/svg">
+  <!-- 样式定义 -->
+  <style>
+    .solid { stroke: #000000; stroke-width: 3; fill: none; }
+    .dashed { stroke: #000000; stroke-width: 3; fill: none; stroke-dasharray: 8 4; }
+    .text-red { fill: #ff0000; font-size: 60px; font-weight: bold; font-family: Arial, sans-serif; }
+  </style>
+
+  <!-- 长方体可见实线棱 -->
+  <line class="solid" x1="0" y1="580" x2="0" y2="80" />
+  <line class="solid" x1="0" y1="80" x2="1000" y2="80" />
+  <line class="solid" x1="1000" y1="80" x2="1000" y2="580" />
+  <line class="solid" x1="1000" y1="580" x2="0" y2="580" />
+  <line class="solid" x1="0" y1="80" x2="-75" y2="5" />
+  <line class="solid" x1="-75" y1="5" x2="925" y2="5" />
+  <line class="solid" x1="925" y1="5" x2="1000" y2="80" />
+  <line class="dashed" x1="925" y1="5" x2="925" y2="505" />
+  <line class="dashed" x1="925" y1="505" x2="1000" y2="580" />
+
+  <!-- 长方体不可见虚线棱 -->
+  <line class="solid" x1="0" y1="580" x2="-75" y2="505" />
+  <line class="solid" x1="-75" y1="505" x2="-75" y2="5" />
+  <line class="dashed" x1="-75" y1="505" x2="925" y2="505" />
+
+  <!-- 字母标签 -->
+  <text class="text-red" x="500" y="570" text-anchor="middle">a</text>
+  <text class="text-red" x="-25" y="535" text-anchor="middle">b</text>
+  <text class="text-red" x="20" y="330" text-anchor="middle">c</text>
+</svg>
